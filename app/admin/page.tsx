@@ -43,18 +43,18 @@ export default function GodownAdminDashboard() {
     else setGodowns(data || []);
   };
 
-  const fetchRequests = async () => {
-    const { data, error } = await supabase
-      .from("storage_requests")
-      .select("*, users(full_name, phone), godowns(name, city)")
-      .in(
-        "godown_id",
-        godowns.map((g) => g.godown_id)
-      )
-      .order("created_at", { ascending: false });
-    if (error) addToast("خرابی: " + error.message, "error");
-    else setRequests(data || []);
-  };
+const fetchRequests = async () => {
+  if (!godowns.length) return;
+  const { data, error } = await supabase
+    .from("storage_requests")
+    .select("*, users(full_name, phone), godowns(name, city)")
+    .in("godown_id", godowns.map((g) => g.godown_id))
+    .order("created_at", { ascending: false });
+    
+  if (error) addToast("خرابی: " + error.message, "error");
+  else setRequests(data || []);
+};
+
 
   const fetchMarketItems = async () => {
     const { data, error } = await supabase
