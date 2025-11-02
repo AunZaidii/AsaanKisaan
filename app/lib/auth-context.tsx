@@ -8,17 +8,22 @@ interface User {
   id: string;
   full_name: string;
   email: string;
-  role: string;
-  language_preference: string;
-  location_lat?: number;
-  location_long?: number;
+  phone?: string;
+  role: "farmer" | "buyer" | "godown_admin";
+  language_preference?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signup: (fullName: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signup: (
+    fullName: string,
+    email: string,
+    password: string,
+    phone: string,
+    role: string
+  ) => Promise<{ success: boolean; error?: string; userId?: string }>;
   logout: () => void;
 }
 
@@ -30,13 +35,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const storedUser = localStorage.getItem("agriverse_user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    if (storedUser) setUser(JSON.parse(storedUser));
     setLoading(false);
   }, []);
 
-  // 🔑 LOGIN
+  // ✅ LOGIN
   const login = async (email: string, password: string) => {
     try {
       const supabase = createClient();
@@ -55,14 +58,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         id: data.id,
         full_name: data.full_name,
         email: data.email,
+        phone: data.phone,
         role: data.role,
         language_preference: data.language_preference,
-        location_lat: data.location_lat,
-        location_long: data.location_long,
       };
 
       setUser(userData);
       localStorage.setItem("agriverse_user", JSON.stringify(userData));
+      setUser(userData);
+
+      // ✅ Redirect based on role
+      if (typeof window !== "undefined") {
+        if (userData.role === "godown_admin") window.location.href = "/admin";
+        else if (userData.role === "buyer") window.location.href = "/buyer";
+        else window.location.href = "/dashboard";
+      }
+
       return { success: true };
     } catch (err) {
       console.error("Login error:", err);
@@ -70,12 +81,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // 📝 SIGNUP
-  const signup = async (fullName: string, email: string, password: string) => {
+  // ✅ SIGNUP
+  const signup = async (fullName: string, email: string, password: string, phone: string, role: string) => {
     try {
       const supabase = createClient();
-
-      // 👇 Insert user record
       const { data, error } = await supabase
         .from("users")
         .insert([
@@ -83,8 +92,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             full_name: fullName,
             email,
             password,
-            role: "farmer",
-            language_preference: "ur",
+            phone,
+            role,
+            language_preference: "english",
           },
         ])
         .select("*");
@@ -98,21 +108,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         id: data[0].id,
         full_name: data[0].full_name,
         email: data[0].email,
+        phone: data[0].phone,
         role: data[0].role,
-        language_preference: data[0].language_preference,
       };
 
       setUser(userData);
       localStorage.setItem("agriverse_user", JSON.stringify(userData));
 
-      return { success: true };
+      return { success: true, userId: data[0].id };
     } catch (err) {
       console.error("Signup exception:", err);
       return { success: false, error: "An error occurred during signup" };
     }
   };
 
-  // 🚪 LOGOUT
+  // ✅ LOGOUT
   const logout = () => {
     setUser(null);
     localStorage.removeItem("agriverse_user");

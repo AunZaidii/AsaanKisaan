@@ -1,25 +1,22 @@
-import type React from "react"
-import { AuthProvider } from "@/lib/auth-context"
-import { ToastProvider } from "@/components/toast-provider"
-import "./globals.css"
+"use client";
 
-export const metadata = {
-  title: "ایگری ورس - کسان ایپ",
-  description: "کسانوں کو ذہین ٹیکنالوجی سے بہتر بنانا",
-}
+import "./globals.css";
+import { AuthProvider } from "@/app/lib/auth-context";
+import { ToastProvider } from "@/components/toast-provider";
+import RoleRedirector from "@/app/lib/role-redirector";
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ur" dir="rtl">
-      <body className="font-urdu">
+    <html lang="en">
+      <body>
         <AuthProvider>
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            {/* ✅ Role redirector only once, globally */}
+            <RoleRedirector />
+            {children}
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>
-  )
+  );
 }
