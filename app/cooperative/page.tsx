@@ -69,7 +69,7 @@ export default function CooperativePage() {
     if (membersRes.data) {
       setMembers(membersRes.data)
       // Filter cooperatives where user is a member
-      const myCoop = coopsRes.data?.filter((c) => membersRes.data.some((m) => m.coop_id === c.coop_id))
+      const myCoop = coopsRes.data?.filter((c:any) => membersRes.data.some((m:any) => m.coop_id === c.coop_id))
       setMyCoops(myCoop || [])
     }
   }

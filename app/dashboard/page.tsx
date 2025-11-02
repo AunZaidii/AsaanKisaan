@@ -78,7 +78,7 @@ export default function DashboardPage() {
       titleEn: "WareChain Marketplace",
       descUrdu: "اپنی پیداوار اسٹور اور بیچیں",
       icon: ShoppingCart,
-      href: "/warechain",
+      href: "/storage",
       color: "from-pink-400 to-pink-600",
     },
   ]
