@@ -2,8 +2,8 @@
 
 import "./globals.css";
 import { AuthProvider } from "@/app/lib/auth-context";
-import { ToastProvider } from "@/components/toast-provider";
 import RoleRedirector from "@/app/lib/role-redirector";
+import { ToastProvider } from "@/components/toast-provider";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -11,7 +11,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <AuthProvider>
           <ToastProvider>
-            {/* ✅ Role redirector only once, globally */}
             <RoleRedirector />
             {children}
           </ToastProvider>
