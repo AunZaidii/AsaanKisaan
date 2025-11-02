@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/app/lib/auth-context";
 
 export default function RoleRedirector() {
@@ -12,28 +12,35 @@ export default function RoleRedirector() {
   useEffect(() => {
     if (loading) return;
 
-    if (user) {
-      let target = "/dashboard";
-      if (user.role === "buyer") target = "/buyer";
-      if (user.role === "godown_admin") target = "/admin";
+    // Allow login/signup always
+    if (pathname.startsWith("/login") || pathname.startsWith("/signup")) return;
 
-      // 🚫 FIX: Only redirect if on root "/" or invalid page
-      const allowedPaths = ["/dashboard", "/buyer", "/admin", "/storage", "/marketplace", "/settings"];
-
-      // If the user is on login/signup, don't redirect
-      if (pathname.startsWith("/login") || pathname.startsWith("/signup")) return;
-
-      // If user is already on an allowed page, do nothing
-      if (allowedPaths.some((p) => pathname.startsWith(p))) return;
-
-      // Otherwise, send them to their correct base page
-      router.push(target);
-    } else {
-      // Not logged in — only redirect if not already on login/signup
-      if (!pathname.startsWith("/login") && !pathname.startsWith("/signup")) {
-        router.push("/login");
-      }
+    // If no user, go to login
+    if (!user) {
+      if (pathname !== "/login" && pathname !== "/signup") router.push("/login");
+      return;
     }
+
+    // 🧭 Role → base route mapping
+    const roleBase: Record<string, string> = {
+      farmer: "/dashboard",
+      buyer: "/buyer",
+      godown_admin: "/admin",
+    };
+
+    const allowedPaths: Record<string, string[]> = {
+      farmer: ["/dashboard", "/storage", "/marketplace", "/settings"],
+      buyer: ["/buyer", "/marketplace", "/profile"],
+      godown_admin: ["/admin", "/requests", "/godowns", "/market"],
+    };
+
+    const basePath = roleBase[user.role] || "/dashboard";
+    const allowed = allowedPaths[user.role] || ["/dashboard"];
+
+    // 🚫 Only redirect if user tries to access unauthorized area
+    const isAllowed = allowed.some((p) => pathname.startsWith(p));
+
+    if (!isAllowed) router.push(basePath);
   }, [user, loading, pathname, router]);
 
   return null;

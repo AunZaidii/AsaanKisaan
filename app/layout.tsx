@@ -2,8 +2,8 @@
 
 import "./globals.css";
 import { AuthProvider } from "@/app/lib/auth-context";
-import RoleRedirector from "@/app/lib/role-redirector";
 import { ToastProvider } from "@/components/toast-provider";
+import RoleRedirector from "@/app/lib/role-redirector";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
